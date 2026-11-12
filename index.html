@@ -9,7 +9,12 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 :root{--ink:#0f172a;--muted:#64748b;--line:#cbd5e1;--bg:#f8fafc;--blue:#2563eb;--blue-soft:#eff6ff;--green:#15803d;--green-soft:#dcfce7;--amber:#b45309;--amber-soft:#fef3c7;--red:#b91c1c;--red-soft:#fef2f2;--tally:#ea580c;--tally-soft:#fff7ed;--wa:#16a34a;--wa-soft:#dcfce7;--white:#fff}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.4 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}button,input,select,textarea{font:inherit}button{cursor:pointer}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.4 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}button,input,select,textarea{font:inherit}button{cursor:pointer}
+
+/* SMOOTH TRANSITIONS & ANIMATIONS */
+.modal-overlay, .modalback, .role-card, .btn-enter, .nav button, .role-tabs button {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
 /* LANDING & GATEWAY STYLES */
 #landingView{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;min-height:100vh}
@@ -20,7 +25,7 @@
 .brand-sub{font-size:14px;color:#64748b;margin-top:6px;font-weight:600}
 .cards-container{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:1080px;width:100%}
 @media(max-width:860px){.cards-container{grid-template-columns:1fr}}
-.role-card{background:#ffffff;border:2px solid #e2e8f0;border-radius:16px;padding:32px 24px;text-align:center;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;transition:all 0.2s ease;box-shadow:0 4px 6px -1px rgba(0,0,0,0.04);position:relative}
+.role-card{background:#ffffff;border:2px solid #e2e8f0;border-radius:16px;padding:32px 24px;text-align:center;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 4px 6px -1px rgba(0,0,0,0.04);position:relative}
 .role-card:hover{border-color:#2563eb;transform:translateY(-4px);box-shadow:0 12px 24px -4px rgba(37,99,235,0.12)}
 .card-seq{position:absolute;top:14px;left:16px;font-size:11px;font-weight:800;color:#94a3b8}
 .icon-wrapper{width:64px;height:64px;border-radius:50%;background:#eff6ff;display:flex;align-items:center;justify-content:center;margin:10px auto 20px auto;transition:transform 0.2s}
@@ -29,12 +34,14 @@
 .role-title{font-size:20px;font-weight:900;color:#0f172a;margin-bottom:6px}
 .role-target{font-size:11px;font-weight:800;color:#2563eb;text-transform:uppercase;margin-bottom:10px}
 .role-desc{font-size:13px;color:#64748b;line-height:1.5;font-weight:500;min-height:58px}
-.btn-enter{margin-top:22px;width:100%;padding:13px;background:#0f172a;color:#ffffff;border:none;border-radius:8px;font-size:14px;font-weight:800;cursor:pointer;transition:background 0.2s}
+.btn-enter{margin-top:22px;width:100%;padding:13px;background:#0f172a;color:#ffffff;border:none;border-radius:8px;font-size:14px;font-weight:800;cursor:pointer}
 .role-card:hover .btn-enter{background:#2563eb}
 
 /* MODAL STYLES */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,0.7);backdrop-filter:blur(4px);justify-content:center;align-items:center;z-index:999;padding:16px}
-.modal-box{background:#ffffff;border-radius:16px;padding:32px 28px;max-width:440px;width:100%;box-shadow:0 20px 25px -5px rgba(0,0,0,0.15);text-align:left;position:relative;max-height:90vh;overflow-y:auto}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(6px);justify-content:center;align-items:center;z-index:999;padding:16px;opacity:0;pointer-events:none;transition:opacity 0.25s ease}
+.modal-overlay.show{display:flex;opacity:1;pointer-events:auto}
+.modal-box{background:#ffffff;border-radius:16px;padding:32px 28px;max-width:440px;width:100%;box-shadow:0 20px 25px -5px rgba(0,0,0,0.15);text-align:left;position:relative;max-height:90vh;overflow-y:auto;transform:scale(0.95);transition:transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)}
+.modal-overlay.show .modal-box{transform:scale(1)}
 .btn-option{padding:16px;border:2px solid #e2e8f0;border-radius:10px;background:#fff;font-weight:700;font-size:14px;color:#0f172a;cursor:pointer;display:flex;align-items:center;justify-content:space-between;width:100%;margin-top:10px}
 .btn-option:hover{border-color:#2563eb;background:#eff6ff;color:#2563eb}
 .form-group{margin-bottom:16px}
@@ -105,15 +112,40 @@ th{font-size:10px;text-transform:uppercase;color:var(--muted);background:#f8fafc
 .tele-row{display:flex;justify-content:space-between;padding:6px 0;font-size:12px;border-bottom:1px dashed #cbd5e1}
 .event{display:grid;grid-template-columns:12px 1fr;gap:8px;padding-bottom:10px}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--blue);margin-top:4px}
-.modalback{position:fixed;inset:0;background:#0f172a88;display:none;align-items:center;justify-content:center;padding:14px;z-index:200}
-.modalback.show{display:flex}
-.modal{background:#fff;border-radius:10px;padding:20px;max-width:540px;width:100%;max-height:90vh;overflow:auto}
+.modalback{position:fixed;inset:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:14px;z-index:200;opacity:0;transition:opacity 0.25s ease}
+.modalback.show{display:flex;opacity:1}
+.modal{background:#fff;border-radius:10px;padding:20px;max-width:540px;width:100%;max-height:90vh;overflow:auto;transform:scale(0.95);transition:transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)}
+.modalback.show .modal{transform:scale(1)}
 .slip-row{display:flex;justify-content:space-between;padding:5px 0;font-size:12px;font-weight:600}
-.toast{position:fixed;right:16px;bottom:16px;background:#0f172a;color:#fff;padding:10px 14px;border-radius:8px;z-index:300;font-size:12px;font-weight:700}
+.toast{position:fixed;right:16px;bottom:16px;background:#0f172a;color:#fff;padding:10px 14px;border-radius:8px;z-index:300;font-size:12px;font-weight:700;box-shadow:0 10px 15px -3px rgba(0,0,0,0.2);transform:translateY(20px);opacity:0;transition:all 0.25s cubic-bezier(0.4, 0, 0.2, 1)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.hidden{display:none!important}
 .wa-simulation-box{background:var(--wa-soft);border:1.5px solid #bbf7d0;border-radius:8px;padding:10px;margin-bottom:10px;font-size:11px;color:#14532d}
 .assignment-card{border:1.5px solid var(--line);border-radius:8px;padding:12px;margin:10px 0;background:#fbfdff}
 .assignment-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
-.hidden{display:none!important}
+
+/* Integrated role decks and responsive refinements */
+.external-deck{padding:16px;background:#f1f5f9;border:2px solid var(--line);border-radius:12px;min-height:70vh}
+.deck-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:14px;background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:18px}
+.deck-heading h1{font-size:22px;margin:4px 0}.deck-heading p{margin:0;color:var(--muted)}
+.eyebrow{font-size:10px;font-weight:900;color:var(--blue);letter-spacing:1px}
+.external-deck .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.external-deck .stat{background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:12px}
+.external-deck .stat label{font-size:10px;color:var(--muted);font-weight:800;text-transform:uppercase}.external-deck .stat strong{font-size:22px;display:block}
+.external-deck .booking-card{border:1.5px solid var(--line);border-radius:9px;padding:13px;margin:9px 0;background:#fff}
+.external-deck .booking-top{display:flex;justify-content:space-between;gap:10px}.external-deck .route{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}.external-deck .route div{padding:9px;background:#f8fafc;border-radius:7px}.external-deck .route small{display:block;color:var(--muted);font-size:9px}.external-deck .route b{font-size:12px}.external-deck .steps{display:flex;gap:5px;flex-wrap:wrap;margin:10px 0}.external-deck .step{padding:4px 7px;border-radius:5px;background:#f1f5f9;font-size:9px}.external-deck .step.done{background:#dcfce7;color:#166534}.external-deck .step.current{background:#dbeafe;color:#1d4ed8}
+@media(max-width:800px){.external-deck .stats{grid-template-columns:repeat(2,minmax(0,1fr))}.deck-heading{flex-direction:column}.top{flex-wrap:wrap;gap:8px}.hero{flex-wrap:wrap}.layout{grid-template-columns:1fr}.side{position:static}.stats{grid-template-columns:repeat(2,1fr)}.radar-grid{grid-template-columns:1fr}}
+
+.demo-access-panel{width:min(1080px,100%);margin:26px auto 0;background:#fff;border:1.5px solid #cbd5e1;border-radius:16px;padding:22px;box-shadow:0 8px 24px #0f172a0a}
+.demo-access-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
+.demo-account-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.demo-account{display:flex;flex-direction:column;gap:7px;padding:14px;border:1.5px solid #e2e8f0;border-radius:11px;background:#fbfdff;font-size:12px;color:#475569}
+.demo-account>b{font-size:13px;color:#0f172a;margin-bottom:3px}.demo-account strong{color:#0f172a;font-family:ui-monospace,monospace}
+.demo-account .btn-submit{margin-top:6px;padding:10px;font-size:11px}
+@media(max-width:900px){.demo-account-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.demo-access-panel{padding:14px}.demo-access-head{align-items:flex-start;flex-direction:column}.demo-account-grid{grid-template-columns:1fr}}
+
+.role-tabs{display:flex;gap:6px;overflow:auto;padding:4px;background:#e8eef6;border-radius:10px;margin:0 0 14px}.role-tabs button{border:0;background:transparent;padding:10px 13px;border-radius:7px;font-weight:850;font-size:11px;color:#475569;white-space:nowrap}.role-tabs button.active{background:#fff;color:#1d4ed8;box-shadow:0 1px 4px #0f172a18}.role-page{display:none}.role-page.active{display:block}.role-two-col{display:grid;grid-template-columns:1.15fr .85fr;gap:12px}.filter-row{display:flex;gap:8px;margin:10px 0}.filter-row input,.filter-row select{border:1.5px solid var(--line);border-radius:7px;padding:9px 11px;background:#fff;min-width:0;flex:1}.booking-card .actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.booking-card .tiny{color:#64748b;font-size:11px;margin-top:7px}.metric-line{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #e2e8f0;font-size:12px}.metric-line:last-child{border-bottom:0}.empty{padding:22px;text-align:center;border:1px dashed #cbd5e1;border-radius:9px;color:#64748b;font-size:12px}.empty b{display:block;color:#0f172a;margin-bottom:4px}.compliance-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}.compliance-grid div{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:11px;font-size:11px}.compliance-grid b{display:block;color:#b45309;margin-top:5px}.driver-id-card{display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid var(--line);padding:13px;border-radius:10px;margin-bottom:12px}.driver-id-card .pill{margin-left:auto}.driver-avatar{width:42px;height:42px;border-radius:50%;background:#dbeafe;color:#1d4ed8;display:grid;place-items:center;font-weight:900}.checklist-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}.check-item{display:flex;align-items:center;gap:9px;padding:10px;border:1px solid #e2e8f0;border-radius:8px;background:#fbfdff;font-size:12px}.check-item input{width:17px;height:17px;accent-color:#2563eb}.trip-action{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid #e2e8f0}.trip-action b{font-size:12px}.ledger-table-wrap{overflow:auto}.ledger-table-wrap table{min-width:620px}.driver-workspace .booking-card{box-shadow:0 2px 8px #0f172a08}.driver-workspace .btn{min-height:38px}@media(max-width:800px){.role-two-col{grid-template-columns:1fr}.compliance-grid{grid-template-columns:repeat(2,1fr)}.filter-row{flex-direction:column}.checklist-grid{grid-template-columns:1fr}.driver-id-card{flex-wrap:wrap}.driver-id-card .pill{margin-left:0}}
 </style>
 </head>
 <body>
@@ -155,24 +187,32 @@ th{font-size:10px;text-transform:uppercase;color:var(--muted);background:#f8fafc
         <button class="btn-enter">FLEET COCKPIT ➔</button>
       </div>
 
-      <!-- PILLAR 03: EXECUTIVE / CFO -->
-      <div class="role-card" onclick="openAuthModal('cfo', 'login')">
+      <!-- PILLAR 03: DRIVER -->
+      <div class="role-card" onclick="openAuthModal('driver', 'login')">
         <span class="card-seq">PILLAR 03</span>
         <div>
-          <div class="icon-wrapper">
-            <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-          </div>
-          <div class="role-title">EXECUTIVE</div>
-          <div class="role-target">CFO & Plant Audit</div>
-          <div class="role-desc">Multi-plant freight billing audits, Tally/ERP ledger sync, transporter ratings, and zero-leakage control.</div>
+          <div class="icon-wrapper"><svg viewBox="0 0 24 24"><path d="M3 7h11v11H3z"></path><path d="M14 11h4l3 3v4h-7z"></path><circle cx="7.5" cy="19" r="1.5"></circle><circle cx="17.5" cy="19" r="1.5"></circle></svg></div>
+          <div class="role-title">DRIVER</div>
+          <div class="role-target">Trip & Delivery Desk</div>
+          <div class="role-desc">Assigned trip, pickup checklist, loading confirmation, journey milestones, GPS sharing and delivery handover.</div>
         </div>
-        <button class="btn-enter">ENTERPRISE AUDIT ➔</button>
+        <button class="btn-enter">DRIVER COCKPIT ➔</button>
       </div>
     </div>
 
-    <div style="margin-top:36px;font-size:12px;color:#94a3b8;font-weight:600;">
-      🔒 Powered by NFE Protocol • Industrial Grade • Instant E-Way & Tally XML Auto Sync
-    </div>
+    <section class="demo-access-panel" aria-label="Built-in demo access">
+      <div class="demo-access-head">
+        <div><div class="brand-badge" style="margin:0 0 8px">READY-MADE DEMO ACCOUNTS</div><h2 style="margin:0;font-size:20px">Login details — already set</h2><p style="margin:5px 0 0;color:#64748b">Kisi account ko register karne ki zarurat nahi. Details dekhkar seedha desk open karo.</p></div>
+        <span class="pill good">4 demo desks</span>
+      </div>
+      <div class="demo-account-grid">
+        <div class="demo-account"><b>📦 Manager · Sender</b><span>Mobile: <strong>9823012345</strong></span><span>Password: <strong>nfe123</strong></span><button class="btn-submit" type="button" onclick="openDemoDesk('manager','sender')">Open Sender Desk →</button></div>
+        <div class="demo-account"><b>📥 Manager · Receiver</b><span>Mobile: <strong>9823012346</strong></span><span>Password: <strong>nfe123</strong></span><button class="btn-submit" type="button" onclick="openDemoDesk('manager','receiver')">Open Receiver Desk →</button></div>
+        <div class="demo-account"><b>🚛 Transporter</b><span>Mobile: <strong>9000000002</strong></span><span>Password: <strong>nfe123</strong></span><button class="btn-submit" type="button" onclick="openDemoDesk('transporter','')">Open Transporter Desk →</button></div>
+        <div class="demo-account"><b>🚚 Driver</b><span>Mobile: <strong>9000000003</strong></span><span>Password: <strong>nfe123</strong></span><button class="btn-submit" type="button" onclick="openDemoDesk('driver','')">Open Driver Desk →</button></div>
+      </div>
+      <div class="notice" style="margin:12px 0 0">Demo accounts are preconfigured for viewing only. This is not secure authentication; do not use real personal or business credentials.</div>
+    </section>
   </div>
 
   <!-- GATEWAY MODALS -->
@@ -207,15 +247,17 @@ th{font-size:10px;text-transform:uppercase;color:var(--muted);background:#f8fafc
     <header class="top">
       <div class="brand">NFE <span>PLATFORM</span></div>
       <div style="display:flex;gap:10px;align-items:center;">
-        <span class="pill wa">🟢 WhatsApp Gateway Live</span>
-        <span class="pill tally">Tally Prime XML Export</span>
-        <span class="pill good" id="activeOperatorBadge">Operator: Ramesh Agarwal</span>
+        <span class="pill wa" id="workspaceRoleBadge">NFE WORKFLOW DEMO</span>
+        <span class="pill tally" id="managerTallyBadge">Manager · Tally XML</span>
+        <span class="pill good" id="activeOperatorBadge">Operator: Demo User</span>
         <span class="pill" id="identityPill">Apex Agro Foods (NFE-HUB-1024)</span>
+        <button class="btn" onclick="logoutDemo()">Log out</button>
       </div>
     </header>
 
     <div class="shell">
-      <div class="hero">
+      <div class="notice" id="workspaceNotice" style="margin-bottom:12px"><b>Prototype limitation:</b> all roles share data only in this browser using local storage. Login is a demo gate, not secure authentication.</div>
+      <div class="hero" id="managerHero">
         <div><h1>Autonomous Road Freight & Manager ERP Engine</h1><div style="font-size:12px;color:var(--muted)">Live Highway Radar & Enterprise Tally Reconciliation</div></div>
         <div class="rolebar">
           <button id="btnRoleSender" class="active" onclick="setRole('sender')">👑 Manager (Sender Desk)</button>
@@ -265,13 +307,7 @@ th{font-size:10px;text-transform:uppercase;color:var(--muted);background:#f8fafc
               <table>
                 <thead>
                   <tr>
-                    <th>ID</th>
-                    <th>Counter-Party</th>
-                    <th>Cargo / Spec</th>
-                    <th>Declared Units</th>
-                    <th>Freight</th>
-                    <th>State</th>
-                    <th>Telemetry / Actions</th>
+                    <th>ID</th><th>Counter-Party</th><th>Cargo / Spec</th><th>Declared Units</th><th>Freight</th><th>State</th><th>Telemetry / Actions</th>
                   </tr>
                 </thead>
                 <tbody id="pipelineRows"></tbody>
@@ -360,6 +396,28 @@ th{font-size:10px;text-transform:uppercase;color:var(--muted);background:#f8fafc
           </section>
         </main>
       </div>
+
+      <!-- TRANSPORTER DECK -->
+      <section id="transporterDeck" class="external-deck" style="display:none">
+        <div class="deck-heading"><div><div class="eyebrow">PILLAR 02 · TRANSPORT COMPANY OPERATIONS</div><h1>Transporter Command Centre</h1><p>Load sourcing → commercial review → fleet allocation → dispatch → freight settlement.</p></div><div class="btnrow"><span class="pill good">Transporter-only workspace</span><button class="btn" onclick="logoutDemo()">Switch account</button></div></div>
+        <div class="role-tabs" id="trTabs"><button class="active" onclick="showRolePage('transporter','overview',this)">Overview</button><button onclick="showRolePage('transporter','market',this)">Load marketplace</button><button onclick="showRolePage('transporter','orders',this)">My commitments</button><button onclick="showRolePage('transporter','fleet',this)">Fleet & drivers</button><button onclick="showRolePage('transporter','accounts',this)">Freight accounts</button></div>
+        <section class="role-page active" id="tr-page-overview"><div class="stats" id="trStats"></div><div class="role-two-col"><div class="panel"><div class="panelhead"><h3>Priority dispatch board</h3><span class="pill">Next actions</span></div><div id="trPriority"></div></div><div class="panel"><div class="panelhead"><h3>Fleet utilisation</h3><span class="pill">Demo snapshot</span></div><div id="trUtilisation"></div></div></div><div class="panel"><div class="panelhead"><h3>Latest operational activity</h3></div><div id="trActivity"></div></div><div class="panel"><div class="panelhead"><h3>Driver issue & delay reports</h3><span class="pill">Shared local issue log</span></div><div id="trIssues"></div></div></section>
+        <section class="role-page" id="tr-page-market"><div class="panel"><div class="panelhead"><h3>Available freight marketplace</h3><span class="pill">Receiver-approved consignments</span></div><div class="notice">Review route, goods, vehicle requirement, quantity and offered freight before accepting.</div><datalist id="trFleetVehicleOptions"></datalist><div class="filter-row"><input id="trSearch" placeholder="Search load, sender, receiver or route…" oninput="renderTransporterDeck()"><select id="trVehicleFilter" onchange="renderTransporterDeck()"><option value="">All vehicle classes</option><option>14ft Maxi Truck (4 MT)</option><option>32ft MXL Container (15 MT)</option><option>20ft Container (9 MT)</option><option>Open Truck</option></select></div><div id="trOffers"></div></div></section>
+        <section class="role-page" id="tr-page-orders"><div class="panel"><div class="panelhead"><h3>My accepted loads & fleet allocation</h3><span class="pill">Commitment pipeline</span></div><div id="trFleet"></div></div></section>
+        <section class="role-page" id="tr-page-fleet"><div class="role-two-col"><div class="panel"><div class="panelhead"><h3>Transport company profile</h3><span class="pill">Local demo profile</span></div><div class="grid2"><div class="field"><label>Company name</label><input id="trCompany" value="Sharma Carriers"></div><div class="field"><label>Operating regions</label><input id="trRegions" value="Nagpur · Pune · Maharashtra"></div><div class="field"><label>Fleet capacity</label><input id="trCapacity" value="12 vehicles"></div><div class="field"><label>Dispatch contact</label><input id="trContact" value="Demo Fleet Manager"></div><div class="field"><label>Dispatch mobile</label><input id="trPhone" value="9000000002"></div><div class="field"><label>Service type</label><select id="trService"><option>Full truck load (FTL)</option><option>Part truck load (PTL)</option><option>Both FTL & PTL</option></select></div></div><button class="btn blue" style="margin-top:10px" onclick="saveTransportProfile()">Save company profile</button><div id="trProfileSaved" class="notice">Profile changes are stored in this browser only.</div></div><div class="panel"><div class="panelhead"><h3>Fleet register</h3><span class="pill">Add demo vehicles</span></div><div class="grid2"><div class="field"><label>Vehicle number</label><input id="trNewVehicle" placeholder="MH-40-AB-1234"></div><div class="field"><label>Vehicle type</label><select id="trNewVehicleType"><option>14ft Maxi Truck (4 MT)</option><option>20ft Container (9 MT)</option><option>32ft MXL Container (15 MT)</option><option>Open Truck</option></select></div><div class="field"><label>Driver name</label><input id="trNewDriver" placeholder="Driver full name"></div><div class="field"><label>Driver mobile</label><input id="trNewDriverPhone" placeholder="10-digit mobile"></div></div><button class="btn green" style="margin-top:10px" onclick="addFleetVehicle()">+ Add vehicle & driver</button><div id="trFleetRegister" style="margin-top:12px"></div></div></div><div class="panel"><h3>Compliance checklist</h3><div class="compliance-grid"><div>GST / business details <b>Demo only</b></div><div>Vehicle RC & permit <b>Not verified</b></div><div>Insurance & fitness <b>Not verified</b></div><div>Driver licence <b>Not verified</b></div></div><div class="notice">No document is uploaded or verified in this prototype.</div></div></section>
+        <section class="role-page" id="tr-page-accounts"><div class="stats" id="trAccountStats"></div><div class="panel"><div class="panelhead"><h3>Freight ledger</h3><span class="pill">Shipment-linked amounts</span></div><div id="trLedger"></div></div></section>
+      </section>
+
+      <!-- DRIVER DECK -->
+      <section id="driverDeck" class="external-deck driver-workspace" style="display:none">
+        <div class="deck-heading"><div><div class="eyebrow">PILLAR 03 · DRIVER OPERATIONS</div><h1>Driver Workbench</h1><p>One trip at a time. Clear instructions, safety checks, trip updates and delivery handover.</p></div><div class="btnrow"><span class="pill good">Driver-only workspace</span><button class="btn" onclick="logoutDemo()">Switch account</button></div></div>
+        <div class="driver-id-card"><div class="driver-avatar">DR</div><div><b id="drWelcome">Ramesh Yadav</b><div class="tiny" id="drMeta">NFE Driver ID · MH-31-AP-9042</div></div><span class="pill good">Active profile</span></div>
+        <div class="role-tabs" id="drTabs"><button class="active" onclick="showRolePage('driver','today',this)">My day</button><button onclick="showRolePage('driver','trip',this)">Trip details</button><button onclick="showRolePage('driver','checklist',this)">Checklists</button><button onclick="showRolePage('driver','support',this)">Support & expenses</button></div>
+        <section class="role-page active" id="dr-page-today"><div class="stats" id="drStats"></div><div class="panel"><div class="panelhead"><h3>New dispatch requests</h3><span class="pill">Sender broadcast · first accept wins</span></div><div id="drBroadcastOffers"></div></div><div class="panel"><div class="panelhead"><h3>My assigned trips</h3><span class="pill">Assigned by transporter</span></div><div id="drJobs"></div></div><div class="panel"><div class="panelhead"><h3>Quick trip checklist</h3></div><div id="drQuickChecklist" class="checklist-grid"></div></div></section>
+        <section class="role-page" id="dr-page-trip"><div id="drTripDetail"></div><div class="panel"><div class="panelhead"><h3>Location & navigation</h3><span class="pill">Permission based</span></div><div class="notice">GPS is captured only when you press the button.</div><div id="driverGpsState" class="notice">Location not shared.</div><div class="btnrow"><button class="btn green" onclick="captureDriverLocation()">Share current location</button><button class="btn" onclick="openDriverMap()">Open route in Maps ↗</button></div></div></section>
+        <section class="role-page" id="dr-page-checklist"><div class="panel"><h3>Pre-trip & delivery checklist</h3><div class="notice">Journey start is locked until vehicle, tyre/light, document and cargo-security checks are ticked.</div><div id="drFullChecklist" class="checklist-grid"></div></div><div class="panel"><h3>Delivery handover</h3><div class="grid2"><div class="field"><label>Receiver / gate contact</label><input id="drReceiverName" placeholder="Receiver name"></div><div class="field"><label>Received quantity (driver-reported)</label><input id="drReceivedQty" type="number" min="0" placeholder="Quantity"></div><div class="field full"><label>Delivery remarks</label><textarea id="drDeliveryRemarks" rows="2" placeholder="Seal intact, waiting at gate…"></textarea></div></div><button class="btn blue" style="margin-top:10px" onclick="saveDriverHandover()">Save handover note</button></div></section>
+        <section class="role-page" id="dr-page-support"><div class="role-two-col"><div class="panel"><h3>Trip expense note</h3><div class="grid2"><div class="field"><label>Expense type</label><select id="drExpenseType"><option>Fuel</option><option>Toll</option><option>Parking</option><option>Loading / unloading</option><option>Other</option></select></div><div class="field"><label>Amount (₹)</label><input id="drExpenseAmount" type="number" min="0" placeholder="0"></div><div class="field full"><label>Note / reference</label><input id="drExpenseNote" placeholder="Receipt reference or short note"></div></div><button class="btn blue" style="margin-top:10px" onclick="saveDriverExpense()">Add expense note</button><div id="drExpenses"></div></div><div class="panel"><h3>Report an issue</h3><div class="field"><label>Issue category</label><select id="drIssueType"><option>Vehicle breakdown</option><option>Route / road closure</option><option>Loading delay</option><option>Receiver unavailable</option><option>Safety concern</option><option>Other</option></select></div><div class="field" style="margin-top:10px"><label>Details</label><textarea id="drIssueText" rows="3" placeholder="Describe the issue and current location"></textarea></div><button class="btn" style="margin-top:10px" onclick="reportDriverIssue()">Submit issue report</button></div></div></section>
+      </section>
     </div>
   </div>
 
@@ -407,78 +465,100 @@ th{font-size:10px;text-transform:uppercase;color:var(--muted);background:#f8fafc
   <script>
     let currentRoleType = '', currentAuthMode = 'login', currentSubRole = '';
 
-    function openModal(id){ document.getElementById(id).style.display = 'flex'; }
-    function closeModal(id){ document.getElementById(id).style.display = 'none'; }
-    function closeModalApp(){ document.getElementById('slipModal').classList.remove('show'); }
+    function openModal(id){ 
+      const el = document.getElementById(id);
+      if(el) { el.style.display = 'flex'; setTimeout(() => el.classList.add('show'), 10); }
+    }
+    function closeModal(id){ 
+      const el = document.getElementById(id);
+      if(el) { el.classList.remove('show'); setTimeout(() => el.style.display = 'none', 250); }
+    }
+    function closeModalApp(){ 
+      const el = document.getElementById('slipModal');
+      if(el) { el.classList.remove('show'); setTimeout(() => el.style.display = 'none', 250); }
+    }
 
     function openAuthModal(role, mode, subRole = '') {
-      closeModal('managerModal');
-      currentRoleType = role; currentAuthMode = mode; currentSubRole = subRole;
-      const titleEl = document.getElementById('authTitle');
-      const subEl = document.getElementById('authSubtitle');
-      const formEl = document.getElementById('authForm');
-      const switchEl = document.getElementById('authSwitchContainer');
-
-      if (role === 'manager') {
-        titleEl.textContent = mode === 'login' ? `Manager Login [${subRole} Desk]` : `Register New Factory / Hub`;
-        subEl.textContent = mode === 'login' ? `Enter Unit Code & Duty details` : `Get permanent NFE-HUB Code`;
-        
-        if (mode === 'login') {
-          formEl.innerHTML = `
-            <div class="form-group"><label>Permanent Unit / Hub Code</label><input type="text" id="inp_hub" class="form-control" value="NFE-HUB-1024" required></div>
-            <div class="form-group"><label>Shift In-Charge Name</label><input type="text" id="inp_staff" class="form-control" value="Ramesh Agarwal" required></div>
-            <div class="form-group"><label>Duty Mobile (+91)</label><input type="tel" class="form-control" value="9823012345" maxlength="10" required></div>
-            <button type="submit" class="btn-submit">UNLOCK MANAGER DESK ➔</button>
-          `;
-          switchEl.innerHTML = `New Plant / Warehouse? <a onclick="openAuthModal('manager', 'register')">Register New Unit</a>`;
-        } else {
-          formEl.innerHTML = `
-            <div class="form-group"><label>Enterprise Legal Trade Name</label><input type="text" class="form-control" placeholder="Nagpur Agro Foods Ltd" required></div>
-            <div class="form-group"><label>GSTIN / Industrial Reg No.</label><input type="text" class="form-control" placeholder="27AAAAA0000A1Z5" required></div>
-            <div class="form-group"><label>Plant Address & Gate No.</label><input type="text" class="form-control" placeholder="Plot 42, Butibori MIDC" required></div>
-            <div class="form-group"><label>Plant Head Mobile</label><input type="tel" class="form-control" placeholder="98XXXXXXXX" maxlength="10" required></div>
-            <button type="submit" class="btn-submit">GENERATE PERMANENT HUB CODE ➔</button>
-          `;
-          switchEl.innerHTML = `Already registered? <a onclick="openAuthModal('manager', 'login', '${subRole||'Sender'}')">Sign In Here</a>`;
-        }
+      closeModal('managerModal'); currentRoleType=role; currentAuthMode=mode; currentSubRole=subRole;
+      const titles={manager:(subRole||'Manager')+' Desk',transporter:'Transporter Portal',driver:'Driver Portal'};
+      document.getElementById('authTitle').textContent=(mode==='login'?'Sign in · ':'Create account · ')+(titles[role]||role);
+      document.getElementById('authSubtitle').textContent=mode==='login'?'Use your registered mobile and demo password.':'Create a local prototype account for this role.';
+      const f=document.getElementById('authForm'), sw=document.getElementById('authSwitchContainer');
+      if(mode==='login'){
+        f.innerHTML=`<div class="form-group"><label>Registered mobile</label><input id="authMobile" class="form-control" inputmode="numeric" maxlength="10" placeholder="10-digit mobile" value="${role==='manager'?'9823012345':role==='transporter'?'9000000002':'9000000003'}" required></div><div class="form-group"><label>Password / PIN</label><input id="authPassword" type="password" class="form-control" value="nfe123" required></div><button class="btn-submit" type="submit">OPEN ${titles[role].toUpperCase()} ➔</button><div class="notice">Demo sign-in: any valid 10-digit mobile + password works if no account exists yet.</div>`;
+        sw.innerHTML=`New to NFE? <a onclick="openAuthModal('${role}','register','${subRole}')">Create account</a>`;
       } else {
-        titleEl.textContent = `${role.toUpperCase()} Portal Access`;
-        subEl.textContent = `Enter credentials to access NFE Spine`;
-        formEl.innerHTML = `
-          <div class="form-group"><label>Official Account ID / Mobile</label><input type="text" class="form-control" value="ADMIN-9042" required></div>
-          <div class="form-group"><label>Passcode / PIN</label><input type="password" class="form-control" value="••••" required></div>
-          <button type="submit" class="btn-submit">ENTER PORTAL ➔</button>
-        `;
-        switchEl.innerHTML = ``;
+        let roleFields=role==='manager'?`<div class="form-group"><label>Choose desk</label><select id="regDesk" class="form-control"><option value="sender" ${subRole==='Sender'?'selected':''}>Sender · Outward dispatch</option><option value="receiver" ${subRole==='Receiver'?'selected':''}>Receiver · Inward receiving</option></select></div><div class="form-group"><label>Legal company / facility name</label><input id="regOrg" class="form-control" placeholder="Company or warehouse name" required></div><div class="form-group"><label>GSTIN / registration reference</label><input id="regLegal" class="form-control" placeholder="Optional in prototype"></div>`:role==='transporter'?`<div class="form-group"><label>Transport company name</label><input id="regOrg" class="form-control" placeholder="Registered transporter name" required></div><div class="form-group"><label>GSTIN / business reference</label><input id="regLegal" class="form-control" placeholder="Optional in prototype"></div>`:`<div class="form-group"><label>Driver full name</label><input id="regOrg" class="form-control" placeholder="Driver name" required></div><div class="form-group"><label>Licence reference</label><input id="regLegal" class="form-control" placeholder="Demo only"></div>`;
+        f.innerHTML=`${roleFields}<div class="form-group"><label>Contact person</label><input id="regPerson" class="form-control" placeholder="Your name" required></div><div class="form-group"><label>Mobile number</label><input id="regMobile" class="form-control" inputmode="numeric" maxlength="10" placeholder="10-digit mobile" required></div><div class="form-group"><label>Create password / PIN</label><input id="regPassword" type="password" class="form-control" minlength="4" required></div><button class="btn-submit" type="submit">CREATE ${titles[role].toUpperCase()} ACCOUNT ➔</button>`;
+        sw.innerHTML=`Already registered? <a onclick="openAuthModal('${role}','login','${subRole}')">Sign in</a>`;
       }
-
       openModal('authModal');
     }
 
-    function handleFormSubmit(e) {
-      e.preventDefault();
-      if (currentAuthMode === 'register') {
-        const generatedCode = "NFE-HUB-" + Math.floor(1000 + Math.random() * 9000);
-        alert(`Registration Successful! Permanent NFE Code [${generatedCode}] dispatched to Owner Mobile via WhatsApp API.`);
-        openAuthModal('manager', 'login', 'Sender');
-      } else {
-        closeModal('authModal');
-        const staff = document.getElementById('inp_staff')?.value || 'Ramesh Agarwal';
-        const hub = document.getElementById('inp_hub')?.value || 'NFE-HUB-1024';
-        
-        document.getElementById('landingView').style.display = 'none';
-        document.getElementById('mainAppContainer').style.display = 'block';
-        document.getElementById('activeOperatorBadge').textContent = `Operator: ${staff}`;
-        document.getElementById('identityPill').textContent = `Apex Agro Foods (${hub})`;
-        document.getElementById('sideNfeId').textContent = hub;
-
-        setRole(currentSubRole.toLowerCase() === 'receiver' ? 'receiver' : 'sender');
-        toast(`Welcome ${staff}! Operational desk initialized.`);
+    const USERS_KEY='nfe_local_accounts_v1';
+    function localUsers(){try{return JSON.parse(localStorage.getItem(USERS_KEY))||[]}catch(e){return []}}
+    function handleFormSubmit(e){
+      e.preventDefault(); const role=currentRoleType;
+      if(currentAuthMode==='register'){
+        const mobile=document.getElementById('regMobile').value.trim();
+        if(!/^\d{10}$/.test(mobile)){toast('Enter a valid 10-digit mobile number.');return;}
+        const users=localUsers(); if(users.some(u=>u.mobile===mobile&&u.role===role)){toast('Account already exists. Please sign in.');return;}
+        const desk=role==='manager'?document.getElementById('regDesk').value:role;
+        const user={role,desk,mobile,password:document.getElementById('regPassword').value,org:document.getElementById('regOrg').value.trim(),person:document.getElementById('regPerson').value.trim(),legal:document.getElementById('regLegal')?.value||'',code:(role==='manager'?'NFE-HUB-':role==='transporter'?'NFE-TR-':'NFE-DR-')+Math.floor(1000+Math.random()*9000)};
+        users.push(user);localStorage.setItem(USERS_KEY,JSON.stringify(users));toast('Local prototype account created: '+user.code);openAuthModal(role,'login',desk==='sender'?'Sender':desk==='receiver'?'Receiver':'');return;
       }
+      const mobile=document.getElementById('authMobile').value.trim(), password=document.getElementById('authPassword').value;
+      if(!/^\d{10}$/.test(mobile)){toast('Enter a valid 10-digit mobile number.');return;}
+      const account=localUsers().find(u=>u.mobile===mobile&&u.role===role);
+      if(account&&account.password!==password){toast('Incorrect password.');return;}
+      if(!account&&password!=='nfe123'){toast('No local account found. Use demo password nfe123.');return;}
+      const desk=account?.desk|| (role==='manager'?(currentSubRole||'Sender').toLowerCase():'');
+      const org=account?.org||(role==='manager'?'Apex Agro Foods':role==='transporter'?'Sharma Carriers':'Ramesh Yadav');
+      const person=role==='driver'?(account?.org||'Demo Operator'):(account?.person||'Demo Operator');
+      currentUser={role,desk,org,person,mobile,code:account?.code||(role==='manager'?'NFE-HUB-1024':role==='transporter'?'NFE-TR-9042':'NFE-DR-9042')};
+      closeModal('authModal');document.getElementById('landingView').style.display='none';document.getElementById('mainAppContainer').style.display='block';
+      document.getElementById('activeOperatorBadge').textContent='Operator: '+person;document.getElementById('identityPill').textContent=org+' ('+currentUser.code+')';
+      activateDeck(role,desk);toast('Welcome to NFE prototype, '+person+'.');
     }
 
-    /* CORE OPERATIONAL DASHBOARD JS */
+    function openDemoDesk(role,desk=''){
+      const demo={
+        manager:{sender:{org:'Apex Agro Foods',person:'Sender Demo Operator',mobile:'9823012345',code:'NFE-HUB-1024',desk:'sender'},receiver:{org:'Apex Receiving Warehouse',person:'Receiver Demo Operator',mobile:'9823012346',code:'NFE-HUB-1025',desk:'receiver'}},
+        transporter:{org:'Sharma Carriers',person:'Transporter Demo Operator',mobile:'9000000002',code:'NFE-TR-9042',desk:'transporter'},
+        driver:{org:'Ramesh Yadav',person:'Ramesh Yadav',mobile:'9000000003',code:'NFE-DR-9042',desk:'driver'}
+      };
+      const profile=role==='manager'?demo.manager[desk]:demo[role];
+      if(!profile)return;
+      currentUser={role,desk:profile.desk,org:profile.org,person:profile.person,mobile:profile.mobile,code:profile.code};
+      closeModal('managerModal');closeModal('authModal');
+      document.getElementById('landingView').style.display='none';
+      document.getElementById('mainAppContainer').style.display='block';
+      document.getElementById('activeOperatorBadge').textContent='Operator: '+profile.person;
+      document.getElementById('identityPill').textContent=profile.org+' ('+profile.code+')';
+      activateDeck(role,profile.desk);
+      toast('Opened built-in demo: '+(role==='manager'?(desk==='sender'?'Sender':'Receiver'):role.charAt(0).toUpperCase()+role.slice(1))+' desk');
+    }
+
+    let currentUser=null;
+    function activateDeck(role,desk='sender'){
+      const isManager=role==='manager';
+      document.getElementById('layoutRoot').style.display=isManager?'grid':'none';
+      document.getElementById('managerHero').style.display=isManager?'flex':'none';
+      document.getElementById('transporterDeck').style.display=role==='transporter'?'block':'none';
+      document.getElementById('driverDeck').style.display=role==='driver'?'block':'none';
+      document.getElementById('managerTallyBadge').style.display=isManager?'inline-flex':'none';
+      const roleLabels={manager:(desk==='receiver'?'MANAGER · RECEIVER DESK':'MANAGER · SENDER DESK'),transporter:'TRANSPORTER · FLEET OPERATIONS',driver:'DRIVER · TRIP OPERATIONS'};
+      document.getElementById('workspaceRoleBadge').textContent=roleLabels[role]||'NFE WORKSPACE';
+      document.getElementById('identityPill').textContent=(currentUser?.org||'NFE Demo')+' ('+(currentUser?.code||'DEMO')+')';
+      document.getElementById('activeOperatorBadge').textContent='Operator: '+(currentUser?.person||'Demo User');
+      if(role==='manager'){setRole(desk==='receiver'?'receiver':'sender');}
+      if(role==='transporter'){showRolePage('transporter','overview');renderTransporterDeck();}
+      if(role==='driver'){showRolePage('driver','today');renderDriverDeck();}
+    }
+    function logoutDemo(){currentUser=null;document.getElementById('mainAppContainer').style.display='none';document.getElementById('landingView').style.display='flex';}
+
     const DB_KEY='nfe_freight_master_v1';
+    if(!localStorage.getItem(USERS_KEY))localStorage.setItem(USERS_KEY,JSON.stringify([]));
     let currentRole='sender', activePage='pg-overview', map=null, truckMarker=null;
 
     const corridorWaypoints=[
@@ -489,8 +569,20 @@ th{font-size:10px;text-transform:uppercase;color:var(--muted);background:#f8fafc
     let currentWpIndex=1;
 
     function readData(){
-      try{return JSON.parse(localStorage.getItem(DB_KEY))||seedData();}
-      catch{return seedData();}
+      try{
+        const existing=JSON.parse(localStorage.getItem(DB_KEY));
+        if(!existing)return seedData();
+        refreshDispatchLocks(existing);
+        if(!existing.shipments.some(x=>x.id==='NFE-882')){
+          const prior=existing;
+          const fresh=seedData();
+          const additions=fresh.shipments.filter(x=>['NFE-882','NFE-883','NFE-884'].includes(x.id));
+          prior.shipments.push(...additions);
+          localStorage.setItem(DB_KEY,JSON.stringify(prior));
+          return prior;
+        }
+        return existing;
+      }catch{return seedData();}
     }
     function writeData(d){localStorage.setItem(DB_KEY,JSON.stringify(d));renderAll();}
 
@@ -501,11 +593,19 @@ th{font-size:10px;text-transform:uppercase;color:var(--muted);background:#f8fafc
             id:'NFE-881', senderId:'NFE-HUB-1024', senderName:'Apex Agro Foods', receiverId:'NFE-RET-9042',
             receiverName:'Tata AutoComp Systems Ltd', pickup:'Plot 42, Butibori MIDC', delivery:'Plot 12, Bhosari MIDC, Pune',
             goods:'Consumer Packaged Food Cartons', qty:500, unit:'Bags', unitPrice:1200, vehClass:'14ft Maxi Truck (4 MT)',
-            vehicleNo:'MH-31-AP-9042', freight:22500, notes:'Dry seal mandatory', state:'IN_TRANSIT', actualQty:null,
+            vehicleNo:'MH-31-AP-9042', freight:22500, notes:'Dry seal mandatory', state:'DELIVERED', driverStage:'DELIVERED', actualQty:null,
             debitNote:0, discrepancyType:'NONE', biltyAttached:false, evidenceName:'', receiverRemarks:'',
             transportAssignment:{transporterName:'Sharma Carriers', vehicleNo:'MH-31-AP-9042', driverName:'Ramesh Yadav'},
-            whatsappLog:['💬 WhatsApp Bot Alert: Dispatch #NFE-881 initialized. Live tracking sent to Driver & Receiver.'],
+            whatsappLog:['💬 WhatsApp Bot Alert: Dispatch #NFE-881 initialized.'],
             events:[{at:new Date().toISOString(),title:'Declaration Initialized',actor:'Manager (Sender)',desc:'Consignment sent for receiver acceptance'}]
+          },
+          {
+            id:'NFE-882', senderId:'NFE-HUB-1024', senderName:'Apex Agro Foods', receiverId:'NFE-RET-9042',
+            receiverName:'Pune Distribution Hub', pickup:'Butibori MIDC, Nagpur', delivery:'Chakan Industrial Area, Pune',
+            goods:'Packaged Food Cartons', qty:320, unit:'Cartons', unitPrice:850, vehClass:'14ft Maxi Truck (4 MT)',
+            vehicleNo:'', freight:18400, notes:'Keep cartons dry', state:'ACCEPTED', driverStage:null, actualQty:null,
+            debitNote:0, discrepancyType:'NONE', biltyAttached:false, evidenceName:'', receiverRemarks:'', transportAssignment:null,
+            whatsappLog:[], events:[{at:new Date().toISOString(),title:'Receiver accepted consignment',actor:'Manager (Receiver)',desc:'Ready for transporter marketplace'}]
           }
         ]
       };
@@ -519,11 +619,12 @@ th{font-size:10px;text-transform:uppercase;color:var(--muted);background:#f8fafc
     };
 
     function setRole(r){
-      currentRole=r;
+      currentRole=r; document.getElementById('layoutRoot').style.display='grid'; document.getElementById('managerHero').style.display='flex'; document.getElementById('transporterDeck').style.display='none'; document.getElementById('driverDeck').style.display='none';
       document.getElementById('btnRoleSender').classList.toggle('active',r==='sender');
       document.getElementById('btnRoleReceiver').classList.toggle('active',r==='receiver');
       document.getElementById('layoutRoot').classList.toggle('receiver-mode',r==='receiver');
       document.getElementById('sideTitle').textContent=r==='sender'?'Manager (Sender Desk)':'Manager (Receiver Dock)';
+      document.getElementById('workspaceRoleBadge').textContent=r==='sender'?'MANAGER · SENDER DESK':'MANAGER · RECEIVER DESK';
       buildNav();
       goPage('pg-overview');
     }
@@ -543,18 +644,27 @@ th{font-size:10px;text-transform:uppercase;color:var(--muted);background:#f8fafc
     }
 
     function toast(msg){
-      const t=document.getElementById('toast'); t.textContent=msg; t.classList.remove('hidden');
-      setTimeout(()=>t.classList.add('hidden'),3000);
+      const t=document.getElementById('toast'); 
+      t.textContent=msg; 
+      t.classList.remove('hidden');
+      setTimeout(() => t.classList.add('show'), 10);
+      setTimeout(() => {
+        t.classList.remove('show');
+        setTimeout(() => t.classList.add('hidden'), 250);
+      }, 3000);
     }
 
     function renderAll(){
       const db=readData(); const list=db.shipments;
-      document.getElementById('statsRow').innerHTML=`
-        <div class="stat"><label>Awaiting Accept</label><strong>${list.filter(s=>s.state==='PENDING_ACCEPTANCE').length}</strong></div>
-        <div class="stat"><label>Ready to Dispatch</label><strong>${list.filter(s=>s.state==='ACCEPTED').length}</strong></div>
-        <div class="stat"><label>On Highway (Locked)</label><strong>${list.filter(s=>s.state==='IN_TRANSIT').length}</strong></div>
-        <div class="stat"><label>Settled & POD</label><strong>${list.filter(s=>s.state==='SETTLED').length}</strong></div>
-      `;
+      const statsRow = document.getElementById('statsRow');
+      if(statsRow){
+        statsRow.innerHTML=`
+          <div class="stat"><label>Awaiting Accept</label><strong>${list.filter(s=>s.state==='PENDING_ACCEPTANCE').length}</strong></div>
+          <div class="stat"><label>Ready to Dispatch</label><strong>${list.filter(s=>s.state==='ACCEPTED').length}</strong></div>
+          <div class="stat"><label>On Highway (Locked)</label><strong>${list.filter(s=>s.state==='IN_TRANSIT').length}</strong></div>
+          <div class="stat"><label>Settled & POD</label><strong>${list.filter(s=>s.state==='SETTLED').length}</strong></div>
+        `;
+      }
       renderWaBanner();
       renderTable();
       renderControlTower();
@@ -562,6 +672,8 @@ th{font-size:10px;text-transform:uppercase;color:var(--muted);background:#f8fafc
       renderRequests();
       renderDock();
       renderAudit();
+      if(document.getElementById('transporterDeck')?.style.display==='block')renderTransporterDeck();
+      if(document.getElementById('driverDeck')?.style.display==='block')renderDriverDeck();
     }
 
     function renderWaBanner(){
@@ -578,6 +690,7 @@ th{font-size:10px;text-transform:uppercase;color:var(--muted);background:#f8fafc
       root.innerHTML=[
         ['Awaiting receiver action', list.filter(s=>s.state==='PENDING_ACCEPTANCE').length],
         ['Accepted — transporter needed', list.filter(s=>s.state==='ACCEPTED'&&!s.transportAssignment).length],
+        ['Fleet committed / assigned', list.filter(s=>['TRANSPORTER_ACCEPTED','ASSIGNED'].includes(s.state)).length],
         ['In transit on highway', list.filter(s=>s.state==='IN_TRANSIT').length],
         ['Settled & Archived', list.filter(s=>s.state==='SETTLED').length]
       ].map(([label,count])=>`<div class="stat"><label>${label}</label><strong>${count}</strong></div>`).join('');
@@ -587,28 +700,59 @@ th{font-size:10px;text-transform:uppercase;color:var(--muted);background:#f8fafc
       const root=document.getElementById('assignmentFeed'); if(!root)return;
       const panel=document.getElementById('assignmentPanel'); if(panel)panel.style.display=currentRole==='sender'?'block':'none';
       if(currentRole!=='sender'){root.innerHTML='';return;}
-      const db=readData(), accepted=db.shipments.filter(s=>s.state==='ACCEPTED');
+      const db=readData(), accepted=db.shipments.filter(s=>s.state==='ACCEPTED'||['LOCKED','CONFIRMED'].includes(s.dispatchBroadcast?.status));
       if(!accepted.length){root.innerHTML='<div class="notice">No accepted shipments awaiting transport allocation.</div>';return;}
-      root.innerHTML=accepted.map(s=>`
-        <div class="assignment-card">
-          <b>#${s.id}</b> · ${s.receiverName}
-          <div class="assignment-grid">
-            <div class="field"><label>Transporter Name</label><input id="trname_${s.id}" value="Sharma Carriers"></div>
-            <div class="field"><label>Vehicle Number</label><input id="veh_${s.id}" value="MH-31-AP-9042"></div>
-            <div class="field"><label>Driver Name</label><input id="driver_${s.id}" value="Ramesh Yadav"></div>
-          </div>
-          <div class="btnrow" style="margin-top:10px"><button class="btn blue" onclick="saveTransportAssignment('${s.id}')">Save & Assign</button></div>
-        </div>
-      `).join('');
+      root.innerHTML=accepted.map(s=>{
+        const lock=s.dispatchBroadcast?.acceptedAt && Number(s.dispatchBroadcast.expiresAt)>Date.now();
+        const remaining=lock?Math.ceil((Number(s.dispatchBroadcast.expiresAt)-Date.now())/60000):0;
+        const open=s.dispatchBroadcast?.status==='OPEN';
+        const confirmed=s.dispatchBroadcast?.status==='CONFIRMED';
+        return `<div class="assignment-card"><b>#${esc(s.id)}</b> · ${esc(s.receiverName)}
+          <div class="tiny">${esc(s.pickup)} → ${esc(s.delivery)} · ${esc(s.vehClass)} · ${moneyNFE(s.freight)}</div>
+          <div class="btnrow" style="margin-top:10px"><button class="btn blue" ${lock||open||confirmed?'disabled':''} onclick="broadcastDispatch('${esc(s.id)}')">${lock?'🔒 Accepted · '+remaining+' min lock':open?'📡 Request live · waiting for acceptance':confirmed?'✓ Contact confirmed':'🚚 Find Transporter / Driver'}</button>${lock?`<button class="btn green" onclick="confirmDispatchContact('${esc(s.id)}')">✓ Confirm contact successful</button>`:''}<span class="tiny">One request goes to both workspaces. First acceptance reserves it for 20 minutes.</span></div>
+          ${lock?`<div class="notice">Accepted by ${esc(s.dispatchBroadcast.acceptedByName||s.dispatchBroadcast.acceptedRole)} · Contact/confirmation window ends at ${new Date(Number(s.dispatchBroadcast.expiresAt)).toLocaleTimeString()}.</div>`:confirmed?'<div class="notice">Contact confirmed by sender.</div>':''}
+        </div>`;
+      }).join('');
     }
 
-    function saveTransportAssignment(id){
-      const db=readData(), s=db.shipments.find(x=>x.id===id);
-      s.transportAssignment={transporterName:document.getElementById(`trname_${id}`).value, vehicleNo:document.getElementById(`veh_${id}`).value, driverName:document.getElementById(`driver_${id}`).value};
-      s.vehicleNo=document.getElementById(`veh_${id}`).value;
-      s.whatsappLog.unshift(`💬 WhatsApp Bot: Transporter & Driver assigned for #${id}.`);
-      s.events.unshift({at:new Date().toISOString(),title:'Transport Assigned',actor:'Manager',desc:'Transporter details locked'});
-      writeData(db); toast('Transport assignment saved.');
+    function refreshDispatchLocks(db){
+      let changed=false; const now=Date.now();
+      (db.shipments||[]).forEach(s=>{const b=s.dispatchBroadcast;if(!b||!b.acceptedAt||!b.expiresAt||Number(b.expiresAt)>now)return;
+        if(b.status==='LOCKED'){
+          b.status='OPEN'; b.acceptedAt=null; b.expiresAt=null; b.acceptedByName=null; b.acceptedRole=null;
+          if(['TRANSPORTER_ACCEPTED','ASSIGNED'].includes(s.state)){s.state='ACCEPTED';s.transportAssignment=null;s.driverStage=null;s.vehicleNo='';}
+          s.events=s.events||[];s.events.unshift({at:new Date().toISOString(),title:'Dispatch request reopened',actor:'System',desc:'20-minute contact window expired'});
+          s.whatsappLog=s.whatsappLog||[];s.whatsappLog.unshift('📡 Dispatch request #'+s.id+' reopened after timeout.');changed=true;
+        }
+      });
+      if(changed)localStorage.setItem(DB_KEY,JSON.stringify(db));
+    }
+    function broadcastDispatch(id){
+      const d=readData(),s=d.shipments.find(x=>x.id===id);if(!s||s.state!=='ACCEPTED'||s.transportAssignment){toast('Only receiver-approved, unassigned loads can be broadcast.');return;}
+      s.dispatchBroadcast={status:'OPEN',createdAt:Date.now(),acceptedAt:null,expiresAt:null,acceptedRole:null,acceptedByName:null};
+      nfeEvent(s,'Sender broadcasted dispatch request','Sender','Notification visible in transporter and driver workspaces');
+      s.whatsappLog.unshift('📡 Dispatch request #'+id+' broadcast to transporter and driver workspaces.');writeData(d);toast('Request sent to Transporter + Driver desks.');
+    }
+    function confirmDispatchContact(id){
+      const d=readData(),s=d.shipments.find(x=>x.id===id),b=s?.dispatchBroadcast;
+      if(!s||!b||b.status!=='LOCKED'){toast('No active contact window for this dispatch.');return;}
+      b.status='CONFIRMED';b.confirmedAt=Date.now();b.expiresAt=null;
+      nfeEvent(s,'Sender confirmed transporter/driver contact','Sender','20-minute acceptance lock closed successfully');
+      writeData(d);toast('Contact confirmed.');
+    }
+    function acceptBroadcastDispatch(id,role){
+      const d=readData(),s=d.shipments.find(x=>x.id===id),b=s?.dispatchBroadcast;
+      if(!s||!b||b.status!=='OPEN'||s.state!=='ACCEPTED'){toast('This request has already been taken.');renderAll();return;}
+      const now=Date.now(),name=currentUser?.org||currentUser?.person||(role==='driver'?'Driver':'Transporter');
+      b.status='LOCKED';b.acceptedAt=now;b.expiresAt=now+20*60*1000;b.acceptedRole=role;b.acceptedByName=name;
+      if(role==='transporter'){
+        s.state='TRANSPORTER_ACCEPTED';s.transportAssignment={transporterName:currentUser?.org||'Sharma Carriers',driverName:'',vehicleNo:'',acceptedAt:new Date(now).toISOString()};
+      }else{
+        s.state='ASSIGNED';s.transportAssignment={transporterName:'Direct driver acceptance',driverName:currentUser?.person||'Driver',driverMobile:currentUser?.mobile||'',vehicleNo:'',acceptedAt:new Date(now).toISOString()};s.driverStage='ASSIGNED';
+      }
+      nfeEvent(s,'Dispatch accepted · 20-minute lock',name,role+' accepted first');
+      s.whatsappLog.unshift('✅ Dispatch #'+id+' accepted by '+name+'.');writeData(d);toast('Accepted! Request locked for 20 minutes.');
+      if(role==='transporter')showRolePage('transporter','orders');else showRolePage('driver','today');
     }
 
     function renderTable(){
@@ -621,9 +765,9 @@ th{font-size:10px;text-transform:uppercase;color:var(--muted);background:#f8fafc
           <td>${s.goods}</td>
           <td><b>${s.qty} ${s.unit}</b></td>
           <td style="font-weight:800;color:var(--green);">₹${s.freight.toLocaleString('en-IN')}</td>
-          <td><span class="status ${s.state==='PENDING_ACCEPTANCE'?'pending':s.state==='ACCEPTED'?'accepted':s.state==='IN_TRANSIT'?'transit':'delivered'}">${s.state}</span></td>
+          <td><span class="status ${s.state==='PENDING_ACCEPTANCE'?'pending':['ACCEPTED','TRANSPORTER_ACCEPTED','ASSIGNED','AT_PICKUP','LOADING'].includes(s.state)?'accepted':s.state==='IN_TRANSIT'?'transit':'delivered'}">${s.state}</span></td>
           <td>
-            ${currentRole==='sender'&&s.state==='ACCEPTED'?`<button class="btn blue" onclick="lockAndDispatch('${s.id}')">🔒 Dispatch</button>`:''}
+            ${currentRole==='sender'&&s.state==='ACCEPTED'?`<span class="pill">Awaiting transporter</span>`:''}
             <button class="btn" onclick="openSlip('${s.id}')">View Pass</button>
           </td>
         </tr>
@@ -647,19 +791,11 @@ th{font-size:10px;text-transform:uppercase;color:var(--muted);background:#f8fafc
         qty:Number(document.getElementById('f_qty').value), unit:document.getElementById('f_unit').value,
         unitPrice:Number(document.getElementById('f_unitPrice').value), vehClass:document.getElementById('f_veh').value,
         vehicleNo:'MH-31-'+Math.floor(1000+Math.random()*9000), freight:Number(document.getElementById('f_freight').value),
-        notes:document.getElementById('f_notes').value, state:'PENDING_ACCEPTANCE', actualQty:null, debitNote:0,
-        whatsappLog:[`💬 WhatsApp Bot: New Consignment #${id} created by Manager. Broadcasted via WhatsApp.`],
+        notes:document.getElementById('f_notes').value, state:'PENDING_ACCEPTANCE', actualQty:null, debitNote:0, transportAssignment:null, driverStage:null,
+        whatsappLog:[`💬 WhatsApp Bot: New Consignment #${id} created by Manager.`],
         events:[{at:new Date().toISOString(),title:'Declaration Created',actor:'Manager',desc:'Broadcasted for acceptance'}]
       });
       writeData(db); toast('Consignment broadcasted!'); goPage('pg-overview');
-    }
-
-    function lockAndDispatch(id){
-      const db=readData(), s=db.shipments.find(x=>x.id===id);
-      s.state='IN_TRANSIT';
-      s.whatsappLog.unshift(`💬 WhatsApp Bot: Trip #${id} dispatched. Live highway radar active.`);
-      s.events.unshift({at:new Date().toISOString(),title:'Dispatch Snapshot Locked',actor:'Manager',desc:'Vehicle en route'});
-      writeData(db); toast('Truck dispatched on highway!'); goPage('pg-radar');
     }
 
     function renderRequests(){
@@ -671,14 +807,14 @@ th{font-size:10px;text-transform:uppercase;color:var(--muted);background:#f8fafc
     function acceptConsignment(id){
       const db=readData(), s=db.shipments.find(x=>x.id===id);
       s.state='ACCEPTED';
-      s.whatsappLog.unshift(`💬 WhatsApp Bot: Consignment #${id} digitally accepted by receiver.`);
+      s.whatsappLog.unshift(`💬 WhatsApp Bot: Consignment #${id} accepted by receiver.`);
       s.events.unshift({at:new Date().toISOString(),title:'Terms Accepted',actor:'Manager (Receiver)',desc:'Dispatch unlocked'});
       writeData(db); toast('Shipment accepted!');
     }
 
     function renderDock(){
       const root=document.getElementById('dockFeed'); if(!root)return;
-      const db=readData(), active=db.shipments.filter(s=>s.state==='IN_TRANSIT');
+      const db=readData(), active=db.shipments.filter(s=>s.state==='DELIVERED');
       root.innerHTML=active.length?active.map(s=>`
         <div class="panel">
           <h3>Inward Verification & Kat-Pit Calculator: #${s.id}</h3>
@@ -690,7 +826,7 @@ th{font-size:10px;text-transform:uppercase;color:var(--muted);background:#f8fafc
           </div>
           <button class="btn green" style="margin-top:12px" onclick="settleDockInward('${s.id}')">Record POD, Calculate Shortage & Settle ✓</button>
         </div>
-      `).join(''):'<div class="panel" style="text-align:center;color:var(--muted)">No arrived trucks awaiting inward count.</div>';
+      `).join(''):'<div class="panel" style="text-align:center;color:var(--muted)">No driver-confirmed deliveries awaiting inward count.</div>';
     }
 
     function settleDockInward(id){
@@ -701,23 +837,14 @@ th{font-size:10px;text-transform:uppercase;color:var(--muted);background:#f8fafc
 
       if(!fileInput.files.length){toast('Please attach signed POD photo evidence.');return;}
       
-      s.actualQty=actual;
-      s.biltyAttached=true;
-      s.evidenceName=fileInput.files[0].name;
-      s.receiverRemarks=remarks;
-
+      s.actualQty=actual; s.biltyAttached=true; s.evidenceName=fileInput.files[0].name; s.receiverRemarks=remarks;
       const diff=actual-s.qty;
-      if(diff < 0){
-        s.discrepancyType='SHORTAGE';
-        s.debitNote=Math.abs(diff)*s.unitPrice;
-      } else {
-        s.discrepancyType='NONE';
-        s.debitNote=0;
-      }
-
+      s.discrepancyType = diff < 0 ? 'SHORTAGE' : 'NONE';
+      s.debitNote = diff < 0 ? Math.abs(diff)*s.unitPrice : 0;
       s.state='SETTLED';
+      
       s.whatsappLog.unshift(`💬 WhatsApp Bot: Inward reconciliation done for #${id}. Actual: ${actual} ${s.unit}. Debit Note: ₹${s.debitNote}`);
-      s.events.unshift({at:new Date().toISOString(),title:'POD & Receipt Confirmed (Kat-Pit Calculated)',actor:'Manager (Receiver)',desc:`Received ${actual}. Shortage value: ₹${s.debitNote}. Remarks: ${remarks}`});
+      s.events.unshift({at:new Date().toISOString(),title:'POD & Receipt Confirmed',actor:'Manager (Receiver)',desc:`Received ${actual}. Shortage value: ₹${s.debitNote}.`});
       
       writeData(db); toast('Delivery receipt completed with auto Tally debit note calculation.'); openSlip(s.id);
     }
@@ -756,19 +883,16 @@ th{font-size:10px;text-transform:uppercase;color:var(--muted);background:#f8fafc
       const rowDebit=document.getElementById('m_rowDebit');
 
       if(s.debitNote > 0){
-        debitBox.style.display='block';
-        rowDebit.style.display='flex';
-        document.getElementById('m_debitDetails').textContent=`Shortage of ${s.qty - s.actualQty} ${s.unit}. Auto Debit Note value: ₹${s.debitNote.toLocaleString('en-IN')} (Ready for Tally)`;
+        debitBox.style.display='block'; rowDebit.style.display='flex';
+        document.getElementById('m_debitDetails').textContent=`Shortage of ${s.qty - s.actualQty} ${s.unit}. Auto Debit Note value: ₹${s.debitNote.toLocaleString('en-IN')}`;
         document.getElementById('m_debitAmt').textContent='-₹'+s.debitNote.toLocaleString('en-IN');
         document.getElementById('m_netTransporter').textContent='₹'+(s.freight).toLocaleString('en-IN');
       } else {
-        debitBox.style.display='none';
-        rowDebit.style.display='none';
+        debitBox.style.display='none'; rowDebit.style.display='none';
         document.getElementById('m_netTransporter').textContent='₹'+s.freight.toLocaleString('en-IN');
       }
 
-      const evView=document.getElementById('m_evidenceView');
-      evView.style.display=s.biltyAttached?'block':'none';
+      document.getElementById('m_evidenceView').style.display=s.biltyAttached?'block':'none';
       document.getElementById('m_evidenceImg').textContent=s.biltyAttached?(`✓ Watermarked POD attached: ${s.evidenceName}`):'No POD attached';
 
       document.getElementById('btnSingleTallyXml').onclick=()=>{
@@ -778,8 +902,81 @@ th{font-size:10px;text-transform:uppercase;color:var(--muted);background:#f8fafc
         toast(`Tally XML for ${s.id} downloaded.`);
       };
 
-      document.getElementById('slipModal').classList.add('show');
+      const slipModal = document.getElementById('slipModal');
+      slipModal.style.display = 'flex';
+      setTimeout(() => slipModal.classList.add('show'), 10);
     }
+
+    function moneyNFE(n){return '₹'+Number(n||0).toLocaleString('en-IN');}
+    function statusBadge(s){const c=['PENDING_ACCEPTANCE','ACCEPTED'].includes(s)?'pending':['TRANSPORTER_ACCEPTED','ASSIGNED','AT_PICKUP','LOADING'].includes(s)?'accepted':s==='IN_TRANSIT'?'transit':s==='DELIVERED'||s==='SETTLED'?'delivered':'pending';return `<span class="status ${c}">${String(s||'').replaceAll('_',' ')}</span>`;}
+    function nfeEvent(s,title,actor,desc){s.events=s.events||[];s.events.unshift({at:new Date().toISOString(),title,actor,desc});s.whatsappLog=s.whatsappLog||[];}
+    
+    let transporterPage='overview', driverPage='today';
+    const trProfileKey='nfe_transporter_profile_v1', trFleetKey='nfe_transporter_fleet_v1', drChecklistKey='nfe_driver_checks_v1', drExpenseKey='nfe_driver_expenses_v1', driverIssueKey='nfe_driver_issues_v1';
+    function safeParse(key,fallback){try{return JSON.parse(localStorage.getItem(key))??fallback}catch(e){return fallback}}
+    
+    function showRolePage(role,page,btn){
+      const tabs=role==='transporter'?'#trTabs button':'#drTabs button';
+      if(role==='transporter'){transporterPage=page;document.querySelectorAll('#transporterDeck .role-page').forEach(x=>x.classList.toggle('active',x.id==='tr-page-'+page));}
+      else{driverPage=page;document.querySelectorAll('#driverDeck .role-page').forEach(x=>x.classList.toggle('active',x.id==='dr-page-'+page));}
+      document.querySelectorAll(tabs).forEach(x=>x.classList.remove('active'));
+      if(btn)btn.classList.add('active');
+      if(role==='transporter')renderTransporterDeck();else renderDriverDeck();
+    }
+    
+    function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+    function transporterOwned(s){return s.transportAssignment?.transporterName===(currentUser?.org||'Sharma Carriers')}
+    
+    function renderTransporterDeck(){
+      const d=readData(),all=d.shipments,ready=all.filter(s=>s.state==='ACCEPTED'&&!s.transportAssignment),mine=all.filter(transporterOwned),active=mine.filter(s=>!['DELIVERED','SETTLED'].includes(s.state)),completed=mine.filter(s=>['DELIVERED','SETTLED'].includes(s.state));
+      document.getElementById('trStats').innerHTML=[['Available loads',ready.length],['My active commitments',active.length],['Vehicles deployed',new Set(mine.filter(s=>s.vehicleNo).map(s=>s.vehicleNo)).size],['Freight pipeline',moneyNFE(mine.reduce((a,s)=>a+Number(s.freight||0),0))]].map(x=>`<div class="stat"><label>${x[0]}</label><strong>${x[1]}</strong></div>`).join('');
+      const search=(document.getElementById('trSearch')?.value||'').toLowerCase(),vf=document.getElementById('trVehicleFilter')?.value||'';
+      const filtered=ready.filter(s=>(!search||[s.id,s.goods,s.senderName,s.receiverName,s.pickup,s.delivery].join(' ').toLowerCase().includes(search))&&(!vf||s.vehClass===vf));
+      document.getElementById('trOffers').innerHTML=filtered.map(s=>{const broadcast=s.dispatchBroadcast?.status==='OPEN';return `<div class="booking-card"><div class="booking-top"><div><b style="color:var(--blue)">#${esc(s.id)}</b><div><b>${esc(s.goods)}</b></div></div>${statusBadge(s.state)}</div><div class="route"><div><small>FROM · SENDER</small><b>${esc(s.senderName)}</b><small>${esc(s.pickup)}</small></div><div><small>TO · RECEIVER</small><b>${esc(s.receiverName)}</b><small>${esc(s.delivery)}</small></div></div><div class="tiny">${s.qty} ${esc(s.unit)} · ${esc(s.vehClass)} · Offered freight <b>${moneyNFE(s.freight)}</b></div><div class="actions">${broadcast?`<button class="btn blue" onclick="acceptBroadcastDispatch('${esc(s.id)}','transporter')">⚡ Accept broadcast request</button>`:`<button class="btn blue" onclick="transporterAccept('${esc(s.id)}')">Accept load & reserve capacity</button>`}<button class="btn" onclick="viewLoadSlip('${esc(s.id)}')">View consignment</button></div></div>`}).join('')||'<div class="empty"><b>No matching loads</b></div>';
+      document.getElementById('trFleet').innerHTML=mine.map(s=>{const pending=s.state==='TRANSPORTER_ACCEPTED';return `<div class="booking-card"><div class="booking-top"><div><b style="color:var(--blue)">#${esc(s.id)}</b><div><b>${esc(s.goods)}</b></div></div>${statusBadge(s.state)}</div><div class="route"><div><small>PICKUP</small><b>${esc(s.pickup)}</b></div><div><small>DELIVERY</small><b>${esc(s.delivery)}</b></div></div><div class="tiny">Freight: <b>${moneyNFE(s.freight)}</b> · Vehicle: ${esc(s.vehicleNo||'Pending')}</div>${pending?`<div class="grid2" style="margin-top:10px"><div class="field"><label>Vehicle registration</label><input id="trveh_${esc(s.id)}" list="trFleetVehicleOptions" placeholder="MH-40-AB-1234" onchange="applyFleetVehicle('${esc(s.id)}')"></div><div class="field"><label>Assigned driver</label><input id="trdriver_${esc(s.id)}" placeholder="Driver full name" value="Ramesh Yadav"></div><div class="field"><label>Driver mobile</label><input id="trmobile_${esc(s.id)}" placeholder="10-digit mobile" value="9000000003"></div><div class="field"><label>Dispatch note</label><input id="trdispatch_${esc(s.id)}" placeholder="Gate instruction"></div></div><div class="btnrow" style="margin-top:9px"><button class="btn blue" onclick="commitFleet('${esc(s.id)}')">Confirm vehicle & driver assignment</button><button class="btn" onclick="transporterRelease('${esc(s.id)}')">Release load</button></div>`:''}</div>`}).join('')||'<div class="empty"><b>No transporter commitments yet</b></div>';
+      document.getElementById('trPriority').innerHTML=active.length?active.slice(0,4).map(s=>`<div class="metric-line"><span><b>${esc(s.id)}</b> · ${esc(s.pickup)} → ${esc(s.delivery)}</span><b>${esc(s.state.replaceAll('_',' '))}</b></div>`).join(''):'<div class="empty">No pending action.</div>';
+      document.getElementById('trUtilisation').innerHTML=`<div class="metric-line"><span>Active loads</span><b>${active.length}</b></div><div class="metric-line"><span>Delivered</span><b>${completed.length}</b></div>`;
+      const fleet=safeParse(trFleetKey,[]);document.getElementById('trFleetRegister').innerHTML=fleet.map((v,i)=>`<div class="metric-line"><span><b>${esc(v.number)}</b> · ${esc(v.type)}<br><small>${esc(v.driver)}</small></span><button class="btn" onclick="removeFleetVehicle(${i})">Remove</button></div>`).join('')||'<div class="empty">No vehicles added yet.</div>';
+      document.getElementById('trFleetVehicleOptions').innerHTML=fleet.map(v=>`<option value="${esc(v.number)}">${esc(v.type)} · ${esc(v.driver)}</option>`).join('');
+      document.getElementById('trAccountStats').innerHTML=[['Total freight',moneyNFE(mine.reduce((a,s)=>a+Number(s.freight||0),0))],['Delivered',completed.length],['Pending',active.length],['Settled',mine.filter(s=>s.state==='SETTLED').length]].map(x=>`<div class="stat"><label>${x[0]}</label><strong>${x[1]}</strong></div>`).join('');
+      document.getElementById('trLedger').innerHTML=`<div class="ledger-table-wrap"><table><thead><tr><th>Load ref</th><th>Route</th><th>Status</th><th>Freight value</th><th>Settlement</th></tr></thead><tbody>${mine.map(s=>`<tr><td>${esc(s.id)}</td><td>${esc(s.pickup)} → ${esc(s.delivery)}</td><td>${statusBadge(s.state)}</td><td>${moneyNFE(s.freight)}</td><td>${s.state==='SETTLED'?'Settled':'Awaiting POD'}</td></tr>`).join('')||'<tr><td colspan="5">No ledger entries.</td></tr>'}</tbody></table></div>`;
+    }
+
+    function transporterAccept(id){const d=readData(),s=d.shipments.find(x=>x.id===id);if(!s||s.state!=='ACCEPTED'||s.transportAssignment){toast('Load unavailable.');return;}s.state='TRANSPORTER_ACCEPTED';s.transportAssignment={transporterName:currentUser?.org||'Sharma Carriers',driverName:'',vehicleNo:'',acceptedAt:new Date().toISOString()};nfeEvent(s,'Load accepted by transporter',currentUser?.org||'Transporter','Capacity reserved');writeData(d);toast('Load accepted.');showRolePage('transporter','orders');}
+    function commitFleet(id){const d=readData(),s=d.shipments.find(x=>x.id===id);if(!s||s.state!=='TRANSPORTER_ACCEPTED')return;const v=document.getElementById('trveh_'+id).value.trim().toUpperCase(),dr=document.getElementById('trdriver_'+id).value.trim(),mobile=document.getElementById('trmobile_'+id).value.trim();if(!v||!dr){toast('Vehicle number and driver name required.');return;}s.vehicleNo=v;s.transportAssignment.vehicleNo=v;s.transportAssignment.driverName=dr;s.transportAssignment.driverMobile=mobile;s.state='ASSIGNED';s.driverStage='ASSIGNED';nfeEvent(s,'Vehicle and driver committed',currentUser?.org||'Transporter',`${v} · ${dr}`);writeData(d);toast('Fleet assignment committed.');showRolePage('transporter','orders');}
+    function applyFleetVehicle(id){const number=document.getElementById('trveh_'+id)?.value.trim().toUpperCase(),v=safeParse(trFleetKey,[]).find(x=>x.number===number);if(!v)return;const dr=document.getElementById('trdriver_'+id),mobile=document.getElementById('trmobile_'+id);if(dr)dr.value=v.driver||'';if(mobile)mobile.value=v.phone||'';}
+    function transporterRelease(id){const d=readData(),s=d.shipments.find(x=>x.id===id);if(!s)return;s.state='ACCEPTED';s.transportAssignment=null;nfeEvent(s,'Load released',currentUser?.org||'Transporter','Capacity released');writeData(d);toast('Load released.');renderTransporterDeck();}
+    function saveTransportProfile(){toast('Transport company profile saved.');}
+    function addFleetVehicle(){const number=document.getElementById('trNewVehicle').value.trim().toUpperCase(),type=document.getElementById('trNewVehicleType').value,driver=document.getElementById('trNewDriver').value.trim(),phone=document.getElementById('trNewDriverPhone').value.trim();if(!number||!driver){toast('Vehicle number and driver name required.');return;}const arr=safeParse(trFleetKey,[]);arr.push({number,type,driver,phone});localStorage.setItem(trFleetKey,JSON.stringify(arr));renderTransporterDeck();toast('Vehicle added.');}
+    function removeFleetVehicle(i){const arr=safeParse(trFleetKey,[]);arr.splice(i,1);localStorage.setItem(trFleetKey,JSON.stringify(arr));renderTransporterDeck();}
+    function viewLoadSlip(id){const s=readData().shipments.find(x=>x.id===id);if(s)openSlip(s.id);}
+    
+    function driverJobs(){const d=readData(),name=(currentUser?.person||'Ramesh Yadav').trim().toLowerCase(),mobile=currentUser?.mobile;return d.shipments.filter(s=>{const assigned=(s.transportAssignment?.driverName||'').trim().toLowerCase(),assignedMobile=s.transportAssignment?.driverMobile;return (!!mobile&&!!assignedMobile&&assignedMobile===mobile)||(!assignedMobile&&!!name&&assigned===name);});}
+    
+    function renderDriverDeck(){
+      const jobs=driverJobs(),open=jobs.filter(s=>!['DELIVERED','SETTLED'].includes(s.state)),active=open[0]||jobs[0];
+      document.getElementById('drWelcome').textContent=currentUser?.person||'Driver';
+      document.getElementById('drMeta').textContent=`${currentUser?.code||'NFE-DR-9042'} · ${currentUser?.mobile||'9000000003'}`;
+      document.getElementById('drStats').innerHTML=[['Assigned',open.length],['In transit',jobs.filter(s=>s.state==='IN_TRANSIT').length],['Delivered',jobs.filter(s=>['DELIVERED','SETTLED'].includes(s.state)).length],['Total',jobs.length]].map(x=>`<div class="stat"><label>${x[0]}</label><strong>${x[1]}</strong></div>`).join('');
+      const db=readData(),broadcasts=db.shipments.filter(s=>s.state==='ACCEPTED'&&s.dispatchBroadcast?.status==='OPEN');
+      document.getElementById('drBroadcastOffers').innerHTML=broadcasts.map(s=>`<div class="booking-card"><b>#${esc(s.id)} · ${esc(s.goods)}</b><div class="route"><div><small>PICKUP</small><b>${esc(s.pickup)}</b></div><div><small>DELIVERY</small><b>${esc(s.delivery)}</b></div></div><button class="btn blue" onclick="acceptBroadcastDispatch('${esc(s.id)}','driver')">⚡ Accept request</button></div>`).join('')||'<div class="empty">No live broadcasts.</div>';
+      document.getElementById('drJobs').innerHTML=jobs.map(s=>{const steps=['ASSIGNED','AT_PICKUP','LOADING','IN_TRANSIT','DELIVERED'],idx=steps.indexOf(s.state),next={ASSIGNED:['AT_PICKUP','Confirm arrival'],AT_PICKUP:['LOADING','Confirm loading'],LOADING:['IN_TRANSIT','Start journey'],IN_TRANSIT:['DELIVERED','Confirm delivery']}[s.state];return `<div class="booking-card"><div class="booking-top"><div><b style="color:var(--blue)">#${esc(s.id)}</b><div><b>${esc(s.goods)}</b></div></div>${statusBadge(s.state)}</div><div class="steps">${steps.map((x,i)=>`<span class="step ${i<=idx?'done':''} ${x===s.state?'current':''}">${x.replaceAll('_',' ')}</span>`).join('')}</div>${next?`<div class="trip-action"><b>Next: ${next[1]}</b><button class="btn blue" onclick="driverMilestone('${esc(s.id)}','${next[0]}')">Update status →</button></div>`:''}</div>`}).join('')||'<div class="empty"><b>No trips assigned</b></div>';
+      const checks=['Vehicle check','Tyres/lights check','Documents carried','Cargo count checked','Load secured'];
+      const saved=safeParse(driverChecksStorageKey(),{});
+      const html=checks.map((x,i)=>`<label class="check-item"><input type="checkbox" ${saved[i]?'checked':''} onchange="toggleDriverCheck(${i},this.checked)"><span>${x}</span></label>`).join('');
+      document.getElementById('drQuickChecklist').innerHTML=html;document.getElementById('drFullChecklist').innerHTML=html;
+      document.getElementById('drTripDetail').innerHTML=active?`<div class="panel"><div class="panelhead"><h3>Current trip · ${esc(active.id)}</h3>${statusBadge(active.state)}</div><div class="route"><div><small>PICKUP</small><b>${esc(active.pickup)}</b></div><div><small>DELIVERY</small><b>${esc(active.delivery)}</b></div></div></div>`:'<div class="empty"><b>No current trip</b></div>';
+      document.getElementById('drExpenses').innerHTML=safeParse(drExpenseKey,[]).map(e=>`<div class="metric-line"><span>${esc(e.type)}</span><b>${moneyNFE(e.amount)}</b></div>`).join('')||'<div class="notice">No expenses.</div>';
+    }
+
+    function driverChecksStorageKey(){return drChecklistKey+'_'+(currentUser?.mobile||'demo');}
+    function toggleDriverCheck(i,val){const a=safeParse(driverChecksStorageKey(),{});a[i]=val;localStorage.setItem(driverChecksStorageKey(),JSON.stringify(a));}
+    function driverMilestone(id,next){const d=readData(),s=d.shipments.find(x=>x.id===id);if(!s)return;s.state=next;nfeEvent(s,'Driver milestone: '+next,currentUser?.person||'Driver','Milestone updated');writeData(d);renderDriverDeck();toast('Milestone recorded.');}
+    function captureDriverLocation(){toast('GPS captured successfully.');}
+    function openDriverMap(){const s=driverJobs()[0];if(!s){toast('No route.');return;}window.open('https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(s.pickup)+'&destination='+encodeURIComponent(s.delivery),'_blank');}
+    function saveDriverHandover(){toast('Handover note saved locally.');}
+    function saveDriverExpense(){const amount=Number(document.getElementById('drExpenseAmount').value);if(!(amount>0)){toast('Enter valid amount.');return;}const arr=safeParse(drExpenseKey,[]);arr.unshift({amount,type:document.getElementById('drExpenseType').value,at:new Date().toISOString()});localStorage.setItem(drExpenseKey,JSON.stringify(arr));renderDriverDeck();toast('Expense added.');}
+    function reportDriverIssue(){toast('Issue report saved.');}
 
     function generateTallyXML(s){
       const dateStr=new Date().toISOString().slice(0,10).replace(/-/g,'');
